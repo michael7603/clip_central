@@ -1,28 +1,44 @@
 #Written By: Michael Carson 2025
 #Contains all the main functions required to import, clip, export 
+# main.py
+
+import os
 from utils.download import download_video
 from utils.audio_detect import detect_audio_spikes
-from utils.video_editor import clip_video
+from utils.video_editor import create_clips
+# from utils.whisper import transcribe_clip  # Optional
 
-# === User Input ===
-video_url = input("Paste the video URL: ").strip()
-clip_duration = float(input("Clip duration in seconds (e.g. 5, 10): "))
+def main():
+    print(" CLIP CENTRAL - Automated Clipping Tool\n")
 
-# === Step 1: Download the Video ===
-print("\n Downloading video...")
-video_path = download_video(video_url)
+    # Step 1: Input video source
+    video_input = input(" Input the video URL or local file path: ").strip()
 
-# === Step 2: Analyze Audio for Spikes ===
-print("\n Detecting audio spikes...")
-spike_times = detect_audio_spikes(video_path, chunk_duration=600)  # 10-minute chunks
+    # Step 2: Download if it's a URL
+    if video_input.startswith("http"):
+        print("\n⬇  Downloading video...")
+        video_path = download_video(video_input)
+    else:
+        print("\n Using local video file.")
+        video_path = video_input
 
-if not spike_times:
-    print(" No spikes found. Try lowering the threshold or check audio quality.")
-else:
-    print(f"Found {len(spike_times)} highlight-worthy moments.")
+    print(f" Video ready: {video_path}")
 
-# === Step 3: Create Clips ===
-print("\n✂️ Creating highlight clips...")
-clip_video(video_path, spike_times, clip_length=clip_duration)
+    # Step 3: Analyze audio for spikes
+    print("\n Analyzing audio for highlights...")
+    timestamps = detect_audio_spikes(video_path)
+    print(f" Found {len(timestamps)} spike(s) at: {timestamps}")
 
-print("\n Done! All clips saved in the 'clips/' folder.")
+    # Step 4: Create video clips
+    print("\n✂️  Creating video clips...")
+    clips = create_clips(video_path, timestamps)
+    print(f" Created {len(clips)} clip(s):")
+    for clip in clips:
+        print(f"   - {clip}")
+
+    # Step 5: Auto-save clips to output folder
+    print("\n All clips saved to the 'clips/' folder.")
+    print(" Done! Ready to share your content!")
+
+if __name__ == "__main__":
+    main()
