@@ -6,39 +6,29 @@ import os
 from utils.download import download_video
 from utils.audio_detect import detect_audio_spikes
 from utils.video_editor import create_clips
-# from utils.whisper import transcribe_clip  # Optional
+from utils.detect_facecam import create_clips_with_facecam
 
 def main():
-    print(" CLIP CENTRAL - Automated Clipping Tool\n")
+    # Step 1: Get user input
+    url = input("🎥 Enter a YouTube URL to clip: ")
 
-    # Step 1: Input video source
-    video_input = input(" Input the video URL or local file path: ").strip()
+    # Step 2: Download the video
+    video_path = download_video(url)
 
-    # Step 2: Download if it's a URL
-    if video_input.startswith("http"):
-        print("\n⬇  Downloading video...")
-        video_path = download_video(video_input)
-    else:
-        print("\n Using local video file.")
-        video_path = video_input
+    # Step 3: Detect loud segments
+    rated_clips = detect_audio_spikes(video_path)
 
-    print(f" Video ready: {video_path}")
+    # Step 4: Convert to (start, end) pairs
+    clip_ranges = [(clip["start"], clip["end"]) for clip in rated_clips]
 
-    # Step 3: Analyze audio for spikes
-    print("\n Analyzing audio for highlights...")
-    timestamps = detect_audio_spikes(video_path)
-    print(f" Found {len(timestamps)} spike(s) at: {timestamps}")
+    # Step 5: Generate and save clips
+    output_dir = "clips"
+    created_files = create_clips(video_path, clip_ranges, output_dir=output_dir)
 
-    # Step 4: Create video clips
-    print("\n✂️  Creating video clips...")
-    clips = create_clips(video_path, timestamps)
-    print(f" Created {len(clips)} clip(s):")
-    for clip in clips:
-        print(f"   - {clip}")
-
-    # Step 5: Auto-save clips to output folder
-    print("\n All clips saved to the 'clips/' folder.")
-    print(" Done! Ready to share your content!")
+    # Step 6: Summary
+    print(f"\n🎬 {len(created_files)} clips saved to '{output_dir}/' folder.")
+    for path in created_files:
+        print(f" - {path}")
 
 if __name__ == "__main__":
     main()

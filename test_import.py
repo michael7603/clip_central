@@ -1,3 +1,6 @@
-from moviepy.editor import VideoFileClip
+# test download
 
-print("MoviePy is working.")
+from utils.download import download_video
+
+test_url = input("Paste a YouTube URL to test download: ")
+download_video(test_url)

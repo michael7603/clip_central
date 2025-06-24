@@ -1,5 +1,3 @@
-#Written By: Michael Carson 
-
 import os
 from moviepy.editor import VideoFileClip
 
@@ -14,20 +12,23 @@ def crop_to_9x16(clip, target_width=1080, target_height=1920):
     else:
         return clip_resized.crop(y_center=actual_height // 2, height=target_height)
 
-def create_clips(video_path, clip_ranges, output_dir="clips"):
+def create_zoomed_clips(video_path, clip_ranges, output_dir="clips_zoomed"):
     os.makedirs(output_dir, exist_ok=True)
     clip_paths = []
 
     for i, (start, end) in enumerate(clip_ranges, 1):
-        print(f"✂️  Clipping from {start:.2f}s to {end:.2f}s...")
+        print(f"🔍 Zooming + clipping from {start:.2f}s to {end:.2f}s...")
 
         clip = VideoFileClip(video_path).subclip(start, end)
 
+        # Zoom in by 25%
+        zoomed_clip = clip.resize(1.25)
+
         # Convert to 9:16 short format
-        final_clip = crop_to_9x16(clip)
+        final_clip = crop_to_9x16(zoomed_clip)
 
         # Save
-        filename = f"clip_{i:03d}.mp4"
+        filename = f"zoomed_clip_{i:03d}.mp4"
         output_path = os.path.join(output_dir, filename)
         final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac", verbose=False, logger=None)
 

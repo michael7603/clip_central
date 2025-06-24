@@ -1,7 +1,6 @@
 #detects audio spikes to clip notable moments 
 #rates clips based on avg audio level / length of clip 
 
-
 import librosa
 import numpy as np
 from moviepy.editor import VideoFileClip
@@ -10,7 +9,7 @@ import os
 def detect_audio_spikes(
     video_path, threshold=0.9, pre_clip=90, post_wait=15, window_size=1.0
 ):
-    print(" Loading audio for analysis...")
+    print("🔍 Loading audio for analysis...")
 
     # Load video and extract audio
     clip = VideoFileClip(video_path)
@@ -34,11 +33,11 @@ def detect_audio_spikes(
     # Normalize to 0–1
     energy = energy / np.max(energy)
 
-    # Detect spikes > 90%
+    # Detect spikes > threshold
     spike_indices = np.where(energy > threshold)[0]
     spike_seconds = [i * window_size for i in spike_indices]
 
-    print(f" Detected {len(spike_seconds)} spike(s) above {threshold*100:.0f}% volume.")
+    print(f"🔊 Detected {len(spike_seconds)} spike(s) above {threshold*100:.0f}% volume.")
 
     # Create raw clip ranges (start 90s before, end 15s after)
     raw_ranges = []
@@ -62,8 +61,14 @@ def detect_audio_spikes(
             "rating": round(avg_rating, 3)
         })
 
-    return rated_clips
+    # Sort clips by rating (highest first)
+    rated_clips.sort(key=lambda x: x["rating"], reverse=True)
 
+    print("\n🏆 Suggested clips (sorted by volume rating):")
+    for i, clip in enumerate(rated_clips, 1):
+        print(f"  ▶️ Clip {i}: {clip['start']:.2f}s → {clip['end']:.2f}s | Avg Volume: {clip['rating']:.2f}")
+
+    return rated_clips
 
 def merge_overlapping_ranges(ranges, buffer=5):
     """Merge overlapping or nearby (within `buffer` seconds) clip ranges."""
@@ -83,7 +88,3 @@ def merge_overlapping_ranges(ranges, buffer=5):
             merged.append(current)
 
     return merged
-
-
-
-
