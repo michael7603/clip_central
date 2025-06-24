@@ -2,6 +2,7 @@
 media/
 clips/
 clips_zoomed/
+.DS_Store
 
 # Ignore all video formats just in case
 *.mp4
