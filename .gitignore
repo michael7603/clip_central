@@ -1,0 +1,11 @@
+# Ignore all video files and clips
+media/
+clips/
+clips_zoomed/
+
+# Ignore all video formats just in case
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
